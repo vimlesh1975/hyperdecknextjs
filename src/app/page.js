@@ -1,66 +1,229 @@
-import Image from "next/image";
-import styles from "./page.module.css";
 
-export default function Home() {
+'use client'
+
+import { useEffect, useState } from "react";
+
+import AudioRecordFormatControls from './AudioRecordFormatControls'
+import HyperDeckInfoPage from "./HyperDeckInfoPage";
+import HyperDeckGetExplorer from "./HyperDeckGetExplorer";
+import HyperDeckPostExplorer from "./HyperDeckPostExplorer";
+
+
+
+export default function HyperDeckController() {
+  const [status, setStatus] = useState("Idle");
+  const [timecode, setTimecode] = useState("00:00:00:00");
+  const [clips, setClips] = useState([]);
+  const [currentClip, setCurrentClip] = useState(null);
+  const [supportedCodecs, setSupportedCodecs] = useState([]);
+  const [selectedCodec, setSelectedCodec] = useState("");
+  const [currentCodec, setCurrentCodec] = useState("");
+
+  const loadCodecs = () => {
+    fetch("/api/supported-codecs")
+      .then(res => res.json())
+      .then(data => {
+        console.log("Supported Codecs:", data);
+        setSupportedCodecs(data.codecFormats);
+      })
+      .catch(err => console.error("Error loading codecs:", err));
+  };
+
+  const getCurrentcodec = async () => {
+    const res = await fetch("/api/codec");
+    const current = await res.json();
+    setCurrentCodec(current)
+  }
+
+  useEffect(() => {
+    const ws = new WebSocket("ws://localhost:3000/ws");
+
+    ws.onopen = () => console.log("Connected to backend WS");
+
+    ws.onmessage = (event) => {
+      console.log("WS message received:", event.data);
+      try {
+        const data = JSON.parse(event.data);
+
+        if (data.playing !== undefined) {
+          setStatus(data.playing ? "Playing" : "Stopped");
+        }
+        if (data.timecode) setTimecode(data.timecode);
+        if (data.clipIndex !== undefined) setCurrentClip(data.clipIndex);
+      } catch (err) {
+        console.error("Failed to parse WS message:", err);
+      }
+    };
+
+    return () => ws.close();
+  }, []);
+
+
+
+  const getClips = () => {
+    fetch("/api/clips")
+      .then(res => res.json())
+      .then(data => setClips(data.clips || []));
+  }
+  useEffect(() => {
+    getClips();
+    loadCodecs();
+    getCurrentcodec();
+
+  }, []);
+
+  const sendCommand = (cmd) => {
+    fetch(`/api/${cmd}`, { method: "POST" });
+  };
+
+
+  const playClip = (clipId) => {
+    console.log("Play clip", clipId);
+    fetch("/api/play", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clipId }),
+    })
+      .then((res) => res.json())
+      .then((data) => console.log("Playing clip:", data))
+      .catch((err) => console.error("Error playing clip:", err));
+  };
+
+  const cell = { border: "1px solid #ddd", padding: "8px", textAlign: "center" };
+
+  const refreshClips = () => {
+    getClips();
+  }
+
+  const setInputSource = (source) => {
+    fetch("/api/input-source", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source })
+    })
+      .then(res => res.json())
+      .then(data => console.log("Set input source:", data))
+      .catch(err => console.error("Error setting input source:", err));
+  };
+
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      <div style={{ display: 'flex' }}>
+        <div style={{ padding: "5px" }}>
+          <h2>🎬 HyperDeck Controller</h2>
+          <p>Status: <b>{status}</b></p>
+          <p>Timecode: <b>{timecode}</b></p>
+          <button onClick={() => sendCommand("play")}>▶ Play</button>
+          <button onClick={() => sendCommand("stop")}>⏹ Stop</button>
+          <button onClick={() => sendCommand("record")}>⏺ Record</button>
+
+          <button onClick={() => setInputSource("SDI")}>Use SDI Input</button>
+          <button onClick={() => setInputSource("HDMI")} style={{ marginLeft: 8 }}>
+            Use HDMI Input
+          </button>
+          <button
+            onClick={() => {
+              fetch("/api/post-proxy", {
+                method: "POST",   // you call backend post-proxy → always POST  
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  path: "/transports/0",     // REQUIRED
+                  method: "PUT",             // PUT to HyperDeck
+                  body: { mode: "InputPreview" } // JSON body sent to HyperDeck
+                })
+              })
+                .then(r => r.json())
+                .then(d => console.log("Response:", d))
+                .catch(console.error);
+            }}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Show Input
+          </button>
+
+
+          < AudioRecordFormatControls />
+
         </div>
-      </main>
-    </div>
+        <div>
+          <HyperDeckInfoPage />
+        </div>
+      </div>
+
+
+      <div style={{ padding: "5px" }}>
+        <h2>🎬 HyperDeck Clips</h2>
+        <button onClick={refreshClips}>Refresh clips</button>
+        {<select
+          value={selectedCodec}
+          onChange={(e) => setSelectedCodec(e.target.value)}
+        >
+          <option value="">-- Select Codec --</option>
+
+          {supportedCodecs && supportedCodecs.map((val, i) => (
+            <option key={i} value={val.codec + '_' + val.container}>
+              {val.codec + '_' + val.container}
+            </option>
+          ))}
+        </select>
+
+
+        }
+        <button onClick={() => {
+          fetch("/api/codec", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ codec: selectedCodec.split("_")[0], container: selectedCodec.split("_")[1] })
+          });
+
+        }}>Set Codec Format</button>
+
+        <button onClick={async () => {
+          // const res = await fetch("/api/codec");
+          // const current = await res.json();
+          // setCurrentCodec(current)
+
+          getCurrentcodec();
+
+        }}>Get current code</button>
+        {'Current code:' + currentCodec?.codecFormat?.codec + "_" + currentCodec?.codecFormat?.container}
+        <table style={{ borderCollapse: "collapse", width: "100%", marginTop: "10px" }}>
+          <thead>
+            <tr style={{ backgroundColor: "#f2f2f2" }}>
+              {["ID", "File", "Codec", "Container", "Start TC", "Duration", "Resolution", "Frame Rate", "File Size (MB)", "Action"].map(h => (
+                <th key={h} style={cell}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {clips.map((clip) => {
+              const isPlaying = clip.clipUniqueId === currentClip;
+              return (
+                <tr key={clip.clipUniqueId} style={{ backgroundColor: isPlaying ? "#d1ffd1" : "transparent" }}>
+                  <td style={cell}>{clip.clipUniqueId}</td>
+                  <td style={cell}>{clip.filePath}</td>
+                  <td style={cell}>{clip.codecFormat?.codec}</td>
+                  <td style={cell}>{clip.codecFormat?.container}</td>
+                  <td style={cell}>{clip.startTimecode}</td>
+                  <td style={cell}>{clip.durationTimecode}</td>
+                  <td style={cell}>{clip.videoFormat?.width}x{clip.videoFormat?.height}</td>
+                  <td style={cell}>{clip.videoFormat?.frameRate ?? "N/A"} fps</td>
+                  <td style={cell}>{(clip.fileSize ? clip.fileSize / (1024 * 1024) : 0).toFixed(1)}</td>
+                  <td style={cell}>
+                    <button onClick={() => playClip(clip.clipUniqueId)}>▶ Play</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <HyperDeckGetExplorer />
+      <HyperDeckPostExplorer />
+
+      {/* <HyperDeckInfoPage /> */}
+
+
+    </>
   );
 }
