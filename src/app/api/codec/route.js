@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { BASE_URL } from "@/lib/hyperdeck";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
-    const response = await fetch(`${BASE_URL}/system/codecFormat`);
+    const response = await fetch(`${BASE_URL}/system/codecFormat`, { cache: "no-store" });
     if (!response.ok) {
       const text = await response.text().catch(() => "");
       return NextResponse.json(

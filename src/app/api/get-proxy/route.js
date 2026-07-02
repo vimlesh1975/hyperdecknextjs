@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_URL } from "@/lib/hyperdeck";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -14,7 +16,7 @@ export async function GET(req) {
     }
 
     const url = `${BASE_URL}${path}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: "no-store" });
     const text = await response.text();
 
     let body;

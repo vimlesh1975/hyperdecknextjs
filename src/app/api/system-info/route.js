@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { BASE_URL } from "@/lib/hyperdeck";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const urls = {
@@ -20,7 +22,7 @@ export async function GET() {
     const entries = await Promise.all(
       Object.entries(urls).map(async ([key, url]) => {
         try {
-          const resp = await fetch(url);
+          const resp = await fetch(url, { cache: "no-store" });
           const text = await resp.text();
           if (!resp.ok) {
             return [key, { error: true, status: resp.status, text }];
