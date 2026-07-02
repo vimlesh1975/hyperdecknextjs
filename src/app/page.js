@@ -223,6 +223,8 @@ export default function HyperDeckController() {
       .catch((err) => console.error("Error playing clip:", err));
   };
 
+
+
   const setInputSource = (source) => {
     fetchWithIp("/api/input-source", {
       method: "POST",
@@ -480,7 +482,7 @@ export default function HyperDeckController() {
                 <table style={{ borderCollapse: "collapse", width: "100%" }}>
                   <thead>
                     <tr style={{ backgroundColor: "#1f2937", color: "#e2e8f0", position: "sticky", top: 0, zIndex: 1 }}>
-                      {["ID", "File Path", "Codec", "Container", "Duration", "Res", "Rate", "Size", "Play"].map(h => (
+                      {["ID", "File Path", "Codec", "Duration", "Size", "Play"].map(h => (
                         <th key={h} style={{ ...cell, borderBottom: "2px solid #374151", background: "#1f2937", fontSize: "0.9rem" }}>{h}</th>
                       ))}
                     </tr>
@@ -488,7 +490,7 @@ export default function HyperDeckController() {
                   <tbody>
                     {clips.length === 0 ? (
                       <tr>
-                        <td colSpan={9} style={{ ...cell, color: "#9ca3af", padding: "30px" }}>No clips detected on deck.</td>
+                        <td colSpan={6} style={{ ...cell, color: "#9ca3af", padding: "30px" }}>No clips detected on deck.</td>
                       </tr>
                     ) : (
                       clips.map((clip) => {
@@ -498,10 +500,7 @@ export default function HyperDeckController() {
                             <td style={{ ...cell, borderBottom: "1px solid #1f2937" }}>{clip.clipUniqueId}</td>
                             <td style={{ ...cell, borderBottom: "1px solid #1f2937", textAlign: "left", fontSize: "0.85rem" }}>{clip.filePath}</td>
                             <td style={{ ...cell, borderBottom: "1px solid #1f2937", fontSize: "0.85rem" }}>{clip.codecFormat?.codec}</td>
-                            <td style={{ ...cell, borderBottom: "1px solid #1f2937", fontSize: "0.85rem" }}>{clip.codecFormat?.container}</td>
                             <td style={{ ...cell, borderBottom: "1px solid #1f2937" }}>{clip.durationTimecode}</td>
-                            <td style={{ ...cell, borderBottom: "1px solid #1f2937", fontSize: "0.85rem" }}>{clip.videoFormat?.width}x{clip.videoFormat?.height}</td>
-                            <td style={{ ...cell, borderBottom: "1px solid #1f2937", fontSize: "0.85rem" }}>{clip.videoFormat?.frameRate ?? "N/A"} fps</td>
                             <td style={{ ...cell, borderBottom: "1px solid #1f2937" }}>{(clip.fileSize ? clip.fileSize / (1024 * 1024) : 0).toFixed(1)}M</td>
                             <td style={{ ...cell, borderBottom: "1px solid #1f2937" }}>
                               <button className="btn-action" style={{ background: "#10b981", color: "#fff", padding: "4px 8px", fontSize: "0.8rem", marginRight: 0 }} onClick={() => playClip(clip.clipUniqueId)}>▶ Play</button>
