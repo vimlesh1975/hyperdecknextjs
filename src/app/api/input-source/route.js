@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BASE_URL } from "@/lib/hyperdeck";
+import { resolveUrl } from "@/lib/hyperdeck";
 
 export async function POST(req) {
   try {
@@ -13,7 +13,8 @@ export async function POST(req) {
       );
     }
 
-    const response = await fetch(`${BASE_URL}/transports/0/inputVideoSource`, {
+    const url = resolveUrl(req, "/transports/0/inputVideoSource");
+    const response = await fetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ inputVideoSource: source }),
@@ -32,3 +33,4 @@ export async function POST(req) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+

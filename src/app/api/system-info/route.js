@@ -1,23 +1,24 @@
 import { NextResponse } from "next/server";
-import { BASE_URL } from "@/lib/hyperdeck";
+import { resolveUrl } from "@/lib/hyperdeck";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req) {
   try {
     const urls = {
-      product: `${BASE_URL}/system/product`,
-      codecFormat: `${BASE_URL}/system/codecFormat`,
-      supportedVideoFormats: `${BASE_URL}/system/supportedVideoFormats`,
-      videoFormat: `${BASE_URL}/system/videoFormat`,
-      defaultTimelineFormat: `${BASE_URL}/timelines/0/defaultVideoFormat`,
-      timelineFormat: `${BASE_URL}/timelines/0/videoFormat`,
-      mediaActive: `${BASE_URL}/media/active`,
-      mediaWorkingset: `${BASE_URL}/media/workingset`,
-      transport: `${BASE_URL}/transports/0`,
-      inputVideoSource: `${BASE_URL}/transports/0/inputVideoSource`,
-      timecode: `${BASE_URL}/transports/0/timecode`,
+      product: resolveUrl(req, "/system/product"),
+      codecFormat: resolveUrl(req, "/system/codecFormat"),
+      supportedVideoFormats: resolveUrl(req, "/system/supportedVideoFormats"),
+      videoFormat: resolveUrl(req, "/system/videoFormat"),
+      defaultTimelineFormat: resolveUrl(req, "/timelines/0/defaultVideoFormat"),
+      timelineFormat: resolveUrl(req, "/timelines/0/videoFormat"),
+      mediaActive: resolveUrl(req, "/media/active"),
+      mediaWorkingset: resolveUrl(req, "/media/workingset"),
+      transport: resolveUrl(req, "/transports/0"),
+      inputVideoSource: resolveUrl(req, "/transports/0/inputVideoSource"),
+      timecode: resolveUrl(req, "/transports/0/timecode"),
     };
+
 
     const entries = await Promise.all(
       Object.entries(urls).map(async ([key, url]) => {

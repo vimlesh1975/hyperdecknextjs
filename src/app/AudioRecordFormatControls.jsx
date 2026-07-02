@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-export default function AudioRecordFormatControls() {
+export default function AudioRecordFormatControls({ selectedIp }) {
     const [currentFormat, setCurrentFormat] = useState(null);
     const [supportedFormats, setSupportedFormats] = useState([]);
     const [selectedFormatId, setSelectedFormatId] = useState("");
@@ -14,7 +14,9 @@ export default function AudioRecordFormatControls() {
     const getCurrentAudioFormat = async () => {
         setMessage("");
         try {
-            const res = await fetch(`${API_BASE}/api/audio-record-format`);
+            const res = await fetch(`${API_BASE}/api/audio-record-format`, {
+                headers: { "x-hyperdeck-ip": selectedIp || "" }
+            });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json(); // { codec, numChannels }
             setCurrentFormat(data);
@@ -29,7 +31,9 @@ export default function AudioRecordFormatControls() {
     const loadSupportedFormats = async () => {
         setMessage("");
         try {
-            const res = await fetch(`${API_BASE}/api/audio-supported-record-formats`);
+            const res = await fetch(`${API_BASE}/api/audio-supported-record-formats`, {
+                headers: { "x-hyperdeck-ip": selectedIp || "" }
+            });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             // Expecting: { supportedRecordFormats: [{ format: { codec, numChannels }, available }, ...] }
@@ -69,7 +73,10 @@ export default function AudioRecordFormatControls() {
         try {
             const res = await fetch(`${API_BASE}/api/audio-record-format`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "x-hyperdeck-ip": selectedIp || ""
+                },
                 body: JSON.stringify({ codec, numChannels }),
             });
             const data = await res.json();

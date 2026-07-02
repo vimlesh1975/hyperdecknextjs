@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BASE_URL } from "@/lib/hyperdeck";
+import { resolveUrl } from "@/lib/hyperdeck";
 
 export async function POST(req) {
   try {
@@ -28,7 +28,8 @@ export async function POST(req) {
       );
     }
 
-    const url = `${BASE_URL}${path}`;
+    const url = resolveUrl(req, path);
+
     const fetchOptions = { method: upperMethod, headers: {} };
 
     if (body !== undefined && body !== null) {

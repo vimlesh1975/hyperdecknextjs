@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { BASE_URL } from "@/lib/hyperdeck";
+import { resolveUrl } from "@/lib/hyperdeck";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,8 @@ export async function GET(req) {
       );
     }
 
-    const url = `${BASE_URL}${path}`;
+    const url = resolveUrl(req, path);
+
     const response = await fetch(url, { cache: "no-store" });
     const text = await response.text();
 

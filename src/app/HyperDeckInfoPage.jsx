@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 
-export default function HyperDeckInfoPage() {
+export default function HyperDeckInfoPage({ selectedIp }) {
     const [info, setInfo] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -13,7 +13,9 @@ export default function HyperDeckInfoPage() {
         setLoading(true);
         setError("");
         try {
-            const res = await fetch(`${API_BASE}/api/system-info`);
+            const res = await fetch(`${API_BASE}/api/system-info`, {
+                headers: { "x-hyperdeck-ip": selectedIp || "" }
+            });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
             console.log(data)
@@ -28,7 +30,8 @@ export default function HyperDeckInfoPage() {
 
     useEffect(() => {
         loadInfo();
-    }, []);
+    }, [selectedIp]);
+
 
     const renderSupportedFormatsTable = () => {
         const vf = info?.supportedVideoFormats?.videoFormats;
@@ -45,7 +48,7 @@ export default function HyperDeckInfoPage() {
                     }}
                 >
                     <thead>
-                        <tr style={{ backgroundColor: "#f2f2f2" }}>
+                        <tr style={{ backgroundColor: "#1f2937" }}>
                             <th style={cell}>Name</th>
                             <th style={cell}>Resolution</th>
                             <th style={cell}>Frame Rate</th>
@@ -84,7 +87,7 @@ export default function HyperDeckInfoPage() {
     }
 
     const cell = {
-        border: "1px solid #ddd",
+        border: "1px solid #374151",
         padding: "4px 6px",
         textAlign: "left",
     };
@@ -108,7 +111,11 @@ export default function HyperDeckInfoPage() {
                 </div>
 
                 <div style={{ paddingTop: 25 }}>
-                    <button onClick={loadInfo} disabled={loading}>
+                    <button 
+                        onClick={loadInfo} 
+                        disabled={loading}
+                        style={{ background: "#374151", color: "#f3f4f6", border: "1px solid #4b5563", borderRadius: 6, padding: "6px 16px", cursor: "pointer", fontSize: "0.85rem" }}
+                    >
                         {loading ? "Refreshing…" : "Refresh"}
                     </button>
                 </div>
@@ -169,7 +176,7 @@ export default function HyperDeckInfoPage() {
                                 }}
                             >
                                 <thead>
-                                    <tr style={{ backgroundColor: "#f2f2f2" }}>
+                                    <tr style={{ backgroundColor: "#1f2937" }}>
                                         <th style={cell}>Index</th>
                                         <th style={cell}>Device</th>
                                         <th style={cell}>Volume</th>

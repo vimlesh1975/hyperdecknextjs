@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { BASE_URL } from "@/lib/hyperdeck";
+import { resolveUrl } from "@/lib/hyperdeck";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req) {
   try {
-    const response = await fetch(`${BASE_URL}/system/codecFormat`, { cache: "no-store" });
+    const url = resolveUrl(req, "/system/codecFormat");
+    const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) {
       const text = await response.text().catch(() => "");
       return NextResponse.json(
@@ -33,7 +34,8 @@ export async function POST(req) {
 
     const body = container ? { codec, container } : { codec };
 
-    const response = await fetch(`${BASE_URL}/system/codecFormat`, {
+    const url = resolveUrl(req, "/system/codecFormat");
+    const response = await fetch(url, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -52,3 +54,4 @@ export async function POST(req) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+

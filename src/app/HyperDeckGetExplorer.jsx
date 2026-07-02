@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-export default function HyperDeckGetExplorer() {
+export default function HyperDeckGetExplorer({ selectedIp }) {
     const [selectedPath, setSelectedPath] = useState("/system/product");
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -42,9 +42,11 @@ export default function HyperDeckGetExplorer() {
         setResult(null);
         try {
             const res = await fetch(
-                `${API_BASE}/api/get-proxy?path=${encodeURIComponent(path)}`
+                `${API_BASE}/api/get-proxy?path=${encodeURIComponent(path)}`,
+                { headers: { "x-hyperdeck-ip": selectedIp || "" } }
             );
             const data = await res.json();
+
             setResult(data);
 
             if (!res.ok || !data.ok) {
@@ -69,15 +71,15 @@ export default function HyperDeckGetExplorer() {
 
     return (
         <div style={{ padding: 16 }}>
-            <h2>HyperDeck GET Explorer</h2>
+            <h2 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "12px", color: "#e2e8f0" }}>HyperDeck GET Explorer</h2>
 
             <div style={{ marginBottom: 8 }}>
-                <label>
+                <label style={{ color: "#e2e8f0" }}>
                     Endpoint:
                     <select
                         value={selectedPath}
                         onChange={handleChange}
-                        style={{ marginLeft: 8, minWidth: 260 }}
+                        style={{ marginLeft: 8, minWidth: 260, background: "#1f2937", color: "#f3f4f6", border: "1px solid #4b5563", borderRadius: 6, padding: "6px 12px", cursor: "pointer", outline: "none" }}
                     >
                         {endpoints.map((ep) => (
                             <option key={ep.path} value={ep.path}>
@@ -90,7 +92,7 @@ export default function HyperDeckGetExplorer() {
                 <button
                     onClick={handleReload}
                     disabled={loading}
-                    style={{ marginLeft: 8 }}
+                    style={{ marginLeft: 8, background: "#374151", color: "#f3f4f6", border: "1px solid #4b5563", borderRadius: 6, padding: "6px 16px", cursor: "pointer" }}
                 >
                     {loading ? "Loading…" : "Reload"}
                 </button>
@@ -98,7 +100,7 @@ export default function HyperDeckGetExplorer() {
 
             {/* Show status / message */}
             {message && (
-                <div style={{ marginBottom: 8, fontSize: 12, color: "#333" }}>
+                <div style={{ marginBottom: 8, fontSize: 12, color: "#9ca3af" }}>
                     Status: {message}
                 </div>
             )}
@@ -108,32 +110,33 @@ export default function HyperDeckGetExplorer() {
                 <div
                     style={{
                         marginTop: 8,
-                        border: "1px solid #ddd",
-                        borderRadius: 4,
-                        padding: 8,
+                        border: "1px solid #1e293b",
+                        borderRadius: 8,
+                        padding: 12,
                         fontFamily: "monospace",
                         fontSize: 12,
                         whiteSpace: "pre-wrap",
-                        background: "#fafafa",
+                        background: "#020617",
+                        color: "#e2e8f0",
                     }}
                 >
                     <div style={{ marginBottom: 4 }}>
-                        <b>Requested URL:</b> {result.url}
+                        <b style={{ color: "#38bdf8" }}>Requested URL:</b> {result.url}
                     </div>
                     <div style={{ marginBottom: 4 }}>
-                        <b>HTTP Status:</b> {result.status} (ok: {String(result.ok)})
+                        <b style={{ color: "#38bdf8" }}>HTTP Status:</b> {result.status} (ok: {String(result.ok)})
                     </div>
                     <div>
-                        <b>Body:</b>
+                        <b style={{ color: "#38bdf8" }}>Body:</b>
                     </div>
-                    <pre style={{ margin: 0 }}>
+                    <pre style={{ margin: 0, color: "#34d399" }}>
                         {JSON.stringify(result.body, null, 2)}
                     </pre>
                 </div>
             )}
 
             {!result && !loading && (
-                <div style={{ marginTop: 8, fontSize: 12, color: "#666" }}>
+                <div style={{ marginTop: 8, fontSize: 12, color: "#9ca3af" }}>
                     Select an endpoint to see its response.
                 </div>
             )}

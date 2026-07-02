@@ -3,11 +3,12 @@
 
 import React, { useState, useEffect } from "react";
 
-export default function HyperDeckPostExplorer() {
+export default function HyperDeckPostExplorer({ selectedIp }) {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [path, setPath] = useState("");
     const [method, setMethod] = useState("POST");
     const [bodyText, setBodyText] = useState("");
+
     const [result, setResult] = useState(null);
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
@@ -119,7 +120,10 @@ export default function HyperDeckPostExplorer() {
         try {
             const res = await fetch(`${API_BASE}/api/post-proxy`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "x-hyperdeck-ip": selectedIp || ""
+                },
                 body: JSON.stringify({
                     path,
                     method,
@@ -145,16 +149,16 @@ export default function HyperDeckPostExplorer() {
 
     return (
         <div style={{ padding: 16 }}>
-            <h2>HyperDeck POST / PUT Explorer</h2>
+            <h2 style={{ fontSize: "1.2rem", fontWeight: "700", marginBottom: "12px", color: "#e2e8f0" }}>HyperDeck POST / PUT Explorer</h2>
 
             {/* Action combo */}
             <div style={{ marginBottom: 8 }}>
-                <label>
+                <label style={{ color: "#e2e8f0" }}>
                     Action:
                     <select
                         value={selectedIndex}
                         onChange={handleActionChange}
-                        style={{ marginLeft: 8, minWidth: 280 }}
+                        style={{ marginLeft: 8, minWidth: 280, background: "#1f2937", color: "#f3f4f6", border: "1px solid #4b5563", borderRadius: 6, padding: "6px 12px", cursor: "pointer", outline: "none" }}
                     >
                         {actions.map((a, idx) => (
                             <option key={idx} value={idx}>
@@ -166,23 +170,23 @@ export default function HyperDeckPostExplorer() {
             </div>
 
             {/* Path + method (editable if you want to experiment) */}
-            <div style={{ marginBottom: 8 }}>
-                <label>
+            <div style={{ marginBottom: 8, display: "flex", gap: "10px", alignItems: "center" }}>
+                <label style={{ color: "#e2e8f0" }}>
                     Path:
                     <input
                         type="text"
                         value={path}
                         onChange={(e) => setPath(e.target.value)}
-                        style={{ marginLeft: 8, width: 320 }}
+                        style={{ marginLeft: 8, width: 280, background: "#1f2937", color: "#f3f4f6", border: "1px solid #4b5563", borderRadius: 6, padding: "6px 12px", outline: "none" }}
                     />
                 </label>
 
-                <label style={{ marginLeft: 8 }}>
+                <label style={{ marginLeft: 8, color: "#e2e8f0" }}>
                     Method:
                     <select
                         value={method}
                         onChange={(e) => setMethod(e.target.value)}
-                        style={{ marginLeft: 4 }}
+                        style={{ marginLeft: 4, background: "#1f2937", color: "#f3f4f6", border: "1px solid #4b5563", borderRadius: 6, padding: "6px 12px", cursor: "pointer", outline: "none" }}
                     >
                         <option value="POST">POST</option>
                         <option value="PUT">PUT</option>
@@ -192,7 +196,7 @@ export default function HyperDeckPostExplorer() {
                 <button
                     onClick={handleSend}
                     disabled={loading}
-                    style={{ marginLeft: 8 }}
+                    style={{ marginLeft: 8, background: "#dc2626", color: "#fff", border: "1px solid transparent", borderRadius: 6, padding: "6px 16px", fontWeight: "700", cursor: "pointer" }}
                 >
                     {loading ? "Sending…" : "Send"}
                 </button>
@@ -200,19 +204,19 @@ export default function HyperDeckPostExplorer() {
 
             {/* Request body editor */}
             <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: 12, marginBottom: 4 }}>Body (JSON, optional):</div>
+                <div style={{ fontSize: 12, marginBottom: 4, color: "#e2e8f0" }}>Body (JSON, optional):</div>
                 <textarea
                     value={bodyText}
                     onChange={(e) => setBodyText(e.target.value)}
-                    rows={8}
-                    style={{ width: "100%", fontFamily: "monospace", fontSize: 12 }}
+                    rows={6}
+                    style={{ width: "100%", fontFamily: "monospace", fontSize: 12, background: "#1f2937", color: "#f3f4f6", border: "1px solid #4b5563", borderRadius: 6, padding: "8px", outline: "none" }}
                     placeholder='{} or leave empty for no body'
                 />
             </div>
 
             {/* Status */}
             {message && (
-                <div style={{ marginBottom: 8, fontSize: 12, color: "#333" }}>
+                <div style={{ marginBottom: 8, fontSize: 12, color: "#9ca3af" }}>
                     Status: {message}
                 </div>
             )}
@@ -222,35 +226,36 @@ export default function HyperDeckPostExplorer() {
                 <div
                     style={{
                         marginTop: 8,
-                        border: "1px solid #ddd",
-                        borderRadius: 4,
-                        padding: 8,
+                        border: "1px solid #1e293b",
+                        borderRadius: 8,
+                        padding: 12,
                         fontFamily: "monospace",
                         fontSize: 12,
                         whiteSpace: "pre-wrap",
-                        background: "#fafafa",
+                        background: "#020617",
+                        color: "#e2e8f0",
                     }}
                 >
                     <div style={{ marginBottom: 4 }}>
-                        <b>URL:</b> {result.url}
+                        <b style={{ color: "#38bdf8" }}>URL:</b> {result.url}
                     </div>
                     <div style={{ marginBottom: 4 }}>
-                        <b>Method:</b> {result.method}
+                        <b style={{ color: "#38bdf8" }}>Method:</b> {result.method}
                     </div>
                     <div style={{ marginBottom: 4 }}>
-                        <b>HTTP Status:</b> {result.status} (ok: {String(result.ok)})
+                        <b style={{ color: "#38bdf8" }}>HTTP Status:</b> {result.status} (ok: {String(result.ok)})
                     </div>
                     <div>
-                        <b>Body:</b>
+                        <b style={{ color: "#38bdf8" }}>Body:</b>
                     </div>
-                    <pre style={{ margin: 0 }}>
+                    <pre style={{ margin: 0, color: "#34d399" }}>
                         {JSON.stringify(result.body, null, 2)}
                     </pre>
                 </div>
             )}
 
             {!result && !loading && (
-                <div style={{ marginTop: 8, fontSize: 12, color: "#666" }}>
+                <div style={{ marginTop: 8, fontSize: 12, color: "#9ca3af" }}>
                     Select an action and click "Send" to see the response.
                 </div>
             )}
